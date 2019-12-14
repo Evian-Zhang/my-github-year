@@ -1,5 +1,5 @@
 import React, {ChangeEvent, Component} from 'react'
-import {Button, Col, Input, message, Row} from "antd";
+import {Button, Col, Input, message, notification, Row} from "antd";
 import 'antd/dist/antd.css';
 
 interface LoginPageProps {
@@ -35,14 +35,35 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
                 buttonContent: "正在查找用户"
             });
             fetch("https://api.github.com/users/" + this.username)
-                .then(res => res.json())
+                .then(res => {
+                    switch (res.status) {
+                        case 200: {
+                            return res.json();
+                        }
+                        case 403: {
+                            return Promise.reject("查询次数达到上限，请过段时间再尝试，或者本地运行");
+                        }
+                        case 404: {
+                            return Promise.reject("用户" + this.username + "不存在");
+                        }
+                        default: {
+                            return Promise.reject("未知错误");
+                        }
+                    }
+                })
                 .then(userInfo => this.props.usernameHandler(userInfo.login))
-                .catch(_ => {
-                    this.setState({
-                        isQuerying: false,
-                        buttonContent: "查询"
+                .catch(e => {
+                    const close = () => {
+                        this.setState({
+                            isQuerying: false,
+                            buttonContent: "查询"
+                        });
+                    };
+                    notification.error({
+                        message: "错误",
+                        description: e,
+                        onClose: close
                     });
-                    message.error("用户" + this.username + "不存在");
                 })
         } else {
             message.error("登录名不得为空");

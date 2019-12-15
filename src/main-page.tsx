@@ -1,38 +1,54 @@
 import React, { Component } from 'react'
 
 import LoginPage from "./login-page";
+import DataPage from "./data-page";
 
 interface MainPageProps {
 
 }
 
 interface MainPageState {
-    username: string
-    isUsernameValidate: boolean
+    isUsernameValid: boolean
 }
 
 class MainPage extends Component<MainPageProps, MainPageState> {
+    username: string;
+    token: string;
     constructor(props: MainPageProps) {
         super(props);
 
+        this.username = "";
+        this.token = "";
         this.state = {
-            username: "",
-            isUsernameValidate: false
+            isUsernameValid: false
         };
     }
 
-    usernameHandler(name: string) {
+    usernameTokenHandler(name: string, token: string) {
+        this.username = name;
+        this.token = token;
         this.setState({
-            username: name,
-            isUsernameValidate: true
+            isUsernameValid: true
+        });
+    }
+
+    goBack() {
+        this.username = "";
+        this.token = "";
+        this.setState({
+            isUsernameValid: false,
         });
     }
 
     render() {
         return(
             <div>
-                {!this.state.isUsernameValidate && <LoginPage usernameHandler={this.usernameHandler.bind(this)}/>}
-                {this.state.isUsernameValidate && this.state.username}
+                {!this.state.isUsernameValid &&
+                <LoginPage inputHandler={this.usernameTokenHandler.bind(this)}/>}
+                {this.state.isUsernameValid &&
+                <DataPage username={this.username}
+                          token={this.token}
+                          goBack={this.goBack.bind(this)}/>}
             </div>
         );
     }

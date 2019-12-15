@@ -1,9 +1,9 @@
 import React, {ChangeEvent, Component} from 'react'
-import {Button, Col, Input, message, notification, Row} from "antd";
+import {Button, Col, Input, message, Row} from "antd";
 import 'antd/dist/antd.css';
 
 interface LoginPageProps {
-    usernameHandler: (_: string) => void
+    inputHandler: (arg1: string, arg2: string) => void
 }
 
 interface LoginPageState {
@@ -13,11 +13,13 @@ interface LoginPageState {
 
 class LoginPage extends Component<LoginPageProps, LoginPageState> {
     username: string;
+    token: string;
 
     constructor(props: LoginPageProps) {
         super(props);
 
         this.username = "";
+        this.token = "";
         this.state = {
             isQuerying: false,
             buttonContent: "查询"
@@ -28,43 +30,20 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
         this.username = event.target.value;
     }
 
+    onTokenInputChange(event: ChangeEvent<HTMLInputElement>) {
+        this.token = event.target.value;
+    }
+
     onSubmit() {
         if (this.username.length > 0) {
-            this.setState({
-                isQuerying: true,
-                buttonContent: "正在查找用户"
-            });
-            fetch("https://api.github.com/users/" + this.username)
-                .then(res => {
-                    switch (res.status) {
-                        case 200: {
-                            return res.json();
-                        }
-                        case 403: {
-                            return Promise.reject("查询次数达到上限，请过段时间再尝试，或者本地运行");
-                        }
-                        case 404: {
-                            return Promise.reject("用户" + this.username + "不存在");
-                        }
-                        default: {
-                            return Promise.reject("未知错误");
-                        }
-                    }
-                })
-                .then(userInfo => this.props.usernameHandler(userInfo.login))
-                .catch(e => {
-                    const close = () => {
-                        this.setState({
-                            isQuerying: false,
-                            buttonContent: "查询"
-                        });
-                    };
-                    notification.error({
-                        message: "错误",
-                        description: e,
-                        onClose: close
-                    });
-                })
+            if (this.token.length > 0) {
+                this.props.inputHandler(this.username, this.token);
+                this.setState({
+                    isQuerying: true
+                });
+            } else {
+                message.error("token不得为空")
+            }
         } else {
             message.error("登录名不得为空");
         }
@@ -81,7 +60,15 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
                     <Col span={24}>
                         <div style={{height: "100px"}}>
                             <Input onChange={this.onUsernameInputChange.bind(this)}
-                                placeholder='请输入 GitHub 登录名'/>
+                                   placeholder='请输入 GitHub 登录名'/>
+                        </div>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col span={24}>
+                        <div style={{height: "100px"}}>
+                            <Input.Password onChange={this.onTokenInputChange.bind(this)}
+                                   placeholder='请输入 token'/>
                         </div>
                     </Col>
                 </Row>

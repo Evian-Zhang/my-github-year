@@ -1,10 +1,13 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
 import {Col, message, Row, Typography} from "antd";
 import 'antd/dist/antd.css';
 
 import { DataProcessor } from "./data-processor";
 
 const { Title } = Typography;
+
+const frameHeight = "500px";
 
 interface DataPageProps {
     username: string,
@@ -51,15 +54,12 @@ class DataPage extends Component<DataPageProps, DataPageState> {
                 })
             })
             .then(() => {
-                this.dataProcessor.processData()
-                    .then(() => {
-                        this.setState({
-                            isProcessing: false
-                        });
-                    })
-                    .catch(_ => {
-
-                    });
+                this.dataProcessor.processData();
+                this.setState({
+                    isProcessing: false
+                });
+                console.log(this.dataProcessor);
+                this.renderDataPage();
             })
             .catch((error: string) => {
                 message.error(error);
@@ -71,23 +71,54 @@ class DataPage extends Component<DataPageProps, DataPageState> {
         window.removeEventListener("resize", this.updateWindowDimensions);
     }
 
-    render() {
-        console.log(this.state.height);
-        return (
+    renderDataPage() {
+        console.log(this.dataProcessor.rawData);
+        const noContributionFrame = () => {
+            return (
+                <div style={{ display: "flex",
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: frameHeight }}>
+                    <Title style={{ textAlign: 'center' }}>
+                        你似乎在2019年并没有使用 GitHub
+                    </Title>
+                </div>
+            );
+        };
+
+        const dataPage = () => {
+            return (
             <div>
+                {this.dataProcessor.contributions.hasAnyContributions &&
+                <Row type='flex' align='middle'>
+                    <Col span={24}>
+                        {noContributionFrame()}
+                    </Col>
+                </Row>}
+            </div>
+            );
+        };
+        ReactDOM.render(dataPage(), document.getElementById('dataPage'));
+    }
+
+    render() {
+
+        return (
+            <div id='dataPage'>
                 {this.state.isProcessing &&
                 <Row type='flex' align='middle'>
                     <Col span={24}>
                         <div style={{ display: "flex",
                                       justifyContent: 'center',
                                       alignItems: 'center',
-                                      height: this.state.height }}>
+                                      height: frameHeight }}>
                             <Title style={{ textAlign: 'center' }}>
                                 {this.state.fetchingTip}
                             </Title>
                         </div>
                     </Col>
                 </Row>}
+
             </div>
         );
     }

@@ -1,51 +1,57 @@
 interface QueryResponse {
-    hasAnyContributions: boolean,
-    contributionCalendar: {
-        totalContributions: number,
-        weeks: [{
-            contributionDays: [{
-                date: Date,
-                contributionCount: number
-            }]
-        }]
-    },
-    totalCommitContributions: number,
-    totalRepositoriesWithContributedCommits: number,
-    commitContributionsByRepository: [{
-        repository: {
-            languages: {
-                nodes: [{
-                    name: string
-                }]
-            }
-        }
-    }],
-    totalIssueContributions: number,
-    totalRepositoriesWithContributedIssues: number,
-    popularIssueContribution: {
-        issue: {
-            title: string
-        }
-    },
-    totalPullRequestContributions: number,
-    totalRepositoriesWithContributedPullRequests: number,
-    popularPullRequestContribution: {
-        pullRequest: {
-            title: string
-        }
-    },
-    repositoryContributions: {
-        nodes: [{
-            repository: {
-                languages: {
-                    nodes: [{
-                        name: string
+    data: {
+        user: {
+            contributionsCollection: {
+                hasAnyContributions: boolean,
+                contributionCalendar: {
+                    totalContributions: number,
+                    weeks: [{
+                        contributionDays: [{
+                            date: Date,
+                            contributionCount: number
+                        }]
                     }]
-                }
+                },
+                totalCommitContributions: number,
+                totalRepositoriesWithContributedCommits: number,
+                commitContributionsByRepository: [{
+                    repository: {
+                        languages: {
+                            nodes: [{
+                                name: string
+                            }]
+                        }
+                    }
+                }],
+                totalIssueContributions: number,
+                totalRepositoriesWithContributedIssues: number,
+                popularIssueContribution: {
+                    issue: {
+                        title: string
+                    }
+                } | null,
+                totalPullRequestContributions: number,
+                totalRepositoriesWithContributedPullRequests: number,
+                popularPullRequestContribution: {
+                    pullRequest: {
+                        title: string
+                    }
+                } | null,
+                repositoryContributions: {
+                    nodes: [{
+                        repository: {
+                            languages: {
+                                nodes: [{
+                                    name: string
+                                }]
+                            }
+                        }
+                    }]
+                },
+                totalRepositoryContributions: number
             }
-        }]
-    },
-    totalRepositoryContributions: number
+        }
+    }
 }
 
 class ContributionData {
@@ -78,7 +84,7 @@ class CommitData {
 class IssueData {
     totalIssueContributions: number;
     totalRepositoryWithContributedIssues: number;
-    popularIssueContribution: string;
+    popularIssueContribution: string | null;
 
     constructor() {
         this.totalIssueContributions = 0;
@@ -90,7 +96,7 @@ class IssueData {
 class PullRequestData {
     totalPullRequestContributions: number;
     totalRepositoryWithContributedPullRequests: number;
-    popularPullRequestContribution: string;
+    popularPullRequestContribution: string | null;
 
     constructor() {
         this.totalPullRequestContributions = 0;
@@ -209,29 +215,40 @@ class DataProcessor {
             }
             return Promise.reject(message);
         }
-        this.rawData = await res.json();
-        console.log(this.rawData);
+        const text = await res.text();
+        const reISO = /^(\d{4})-(\d{2})-(\d{2})$/;
+        let dateTimeReceiver = (key: string, value: string) => {
+            let a = reISO.exec(value);
+            if (a) {
+                return new Date(value);
+            }
+            return value;
+        };
+        this.rawData = JSON.parse(text, dateTimeReceiver);
         return Promise.resolve();
     }
 
-    async processData() {
+    processData() {
         if (this.rawData) {
+            let rawData = this.rawData.data.user.contributionsCollection;
+            console.log(rawData);
             // ContributionData
-            this.contributions.hasAnyContributions = this.rawData.hasAnyContributions;
+            this.contributions.hasAnyContributions = rawData.hasAnyContributions;
             if (!this.contributions.hasAnyContributions) {
-                return Promise.resolve();
+                console.log(rawData.hasAnyContributions);
+                return;
             }
-            this.contributions.totalContributions = this.rawData.contributionCalendar.totalContributions;
-            for (let week of this.rawData.contributionCalendar.weeks) {
+            this.contributions.totalContributions = rawData.contributionCalendar.totalContributions;
+            for (let week of rawData.contributionCalendar.weeks) {
                 for (let day of week.contributionDays) {
                     this.contributions.contributionMonths[day.date.getMonth()] += day.contributionCount;
                 }
             }
 
             // CommitData
-            this.commits.totalCommitContributions = this.rawData.totalCommitContributions;
-            this.commits.totalRepositoriesWithContributedCommits = this.rawData.totalRepositoriesWithContributedCommits;
-            for (let repository of this.rawData.commitContributionsByRepository) {
+            this.commits.totalCommitContributions = rawData.totalCommitContributions;
+            this.commits.totalRepositoriesWithContributedCommits = rawData.totalRepositoriesWithContributedCommits;
+            for (let repository of rawData.commitContributionsByRepository) {
                 let languages = repository.repository.languages.nodes;
                 for (let rank = 0; rank < languages.length; rank++) {
                     let score = 1 - rank * 0.1;
@@ -245,18 +262,26 @@ class DataProcessor {
             }
 
             // IssueData
-            this.issues.totalIssueContributions = this.rawData.totalIssueContributions;
-            this.issues.totalRepositoryWithContributedIssues = this.rawData.totalRepositoriesWithContributedIssues;
-            this.issues.popularIssueContribution = this.rawData.popularIssueContribution.issue.title;
+            this.issues.totalIssueContributions = rawData.totalIssueContributions;
+            this.issues.totalRepositoryWithContributedIssues = rawData.totalRepositoriesWithContributedIssues;
+            if (rawData.popularIssueContribution) {
+                this.issues.popularIssueContribution = rawData.popularIssueContribution.issue.title;
+            } else {
+                this.issues.popularIssueContribution = null;
+            }
 
             // PullRequestData
-            this.pullRequests.totalPullRequestContributions = this.rawData.totalPullRequestContributions;
-            this.pullRequests.totalRepositoryWithContributedPullRequests = this.rawData.totalRepositoriesWithContributedPullRequests;
-            this.pullRequests.popularPullRequestContribution = this.rawData.popularPullRequestContribution.pullRequest.title;
+            this.pullRequests.totalPullRequestContributions = rawData.totalPullRequestContributions;
+            this.pullRequests.totalRepositoryWithContributedPullRequests = rawData.totalRepositoriesWithContributedPullRequests;
+            if (rawData.popularPullRequestContribution) {
+                this.pullRequests.popularPullRequestContribution = rawData.popularPullRequestContribution.pullRequest.title;
+            } else {
+                this.pullRequests.popularPullRequestContribution = null;
+            }
 
             // RepositoryData
-            this.repositories.totalRepositoryContributions = this.rawData.totalRepositoryContributions;
-            for (let repository of this.rawData.repositoryContributions.nodes) {
+            this.repositories.totalRepositoryContributions = rawData.totalRepositoryContributions;
+            for (let repository of rawData.repositoryContributions.nodes) {
                 let languages = repository.repository.languages.nodes;
                 for (let rank = 0; rank < languages.length; rank++) {
                     let score = 1 - rank * 0.1;
@@ -269,7 +294,6 @@ class DataProcessor {
                 }
             }
         }
-        return Promise.resolve();
     }
 }
 

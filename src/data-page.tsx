@@ -78,7 +78,8 @@ class DataPage extends Component<DataPageProps, DataPageState> {
         const pieChart = (data: PieDatum[]) => {
             return (
                 <ResponsivePie data={data}
-                               isInteractive={false}/>
+                               isInteractive={false}
+                               enableRadialLabels={false}/>
             );
         };
 
@@ -235,7 +236,8 @@ class DataPage extends Component<DataPageProps, DataPageState> {
     repositoryFrame() {
         let hasRepository = this.dataProcessor.repositories.totalRepositoryContributions !== 0;
         let repositoryMessage1 = "你共创建了" + this.dataProcessor.repositories.totalRepositoryContributions.toString() + "个仓库";
-        let repositoryMessage2 = "这些是你在这些仓库中使用的主要语言";
+        let repositoryMessage2 = "获得了" + this.dataProcessor.repositories.stars.toString() + "颗 star";
+        let repositoryMessage3 = "这些是你在这些仓库中使用的主要语言";
 
         let sortedLanguages = Array.from(this.dataProcessor.repositories.languages)
             .sort((language1, language2) => {
@@ -271,7 +273,9 @@ class DataPage extends Component<DataPageProps, DataPageState> {
                         }}>
                             {[
                                 pieChart(data),
-                                <Title key='repositoryMessage'>{repositoryMessage1}<br/>{repositoryMessage2}</Title>
+                                <Title key='repositoryMessage'>
+                                    {repositoryMessage1}<br/>{repositoryMessage2}<br/>{repositoryMessage3}
+                                </Title>
                             ]}
                         </div>
                     </Col>
@@ -280,6 +284,110 @@ class DataPage extends Component<DataPageProps, DataPageState> {
         } else {
             return (
                 <div key='repositoryFrame' />
+            );
+        }
+    }
+
+    starFrame() {
+        let hasStar = this.dataProcessor.stars.stars !== 0;
+        let starMessage1 = "你共 star 了" + this.dataProcessor.stars.stars.toString() + "个仓库";
+        let starMessage2 = "这些是那些仓库使用的主要语言";
+
+        let sortedLanguages = Array.from(this.dataProcessor.stars.languages)
+            .sort((language1, language2) => {
+                return language1[1] - language2[1];
+            });
+
+        let data: PieDatum[] = sortedLanguages.map((language) => {
+            return {
+                id: language[0],
+                value: language[1],
+            }
+        });
+
+        const pieChart = (data: PieDatum[]) => {
+            return (
+                <ResponsivePie data={data}
+                               enableSlicesLabels={false}
+                               isInteractive={false}
+                               margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+                               key='starPieChart'/>
+            );
+        };
+
+        if (hasStar) {
+            return (
+                <Row key='starFrame'>
+                    <Col span={24}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: frameHeight
+                        }}>
+                            {[
+                                <Title key='starMessage'>{starMessage1}<br/>{starMessage2}</Title>,
+                                pieChart(data)
+                            ]}
+                        </div>
+                    </Col>
+                </Row>
+            );
+        } else {
+            return (
+                <div key='starFrame' />
+            );
+        }
+    }
+
+    watchFrame() {
+        let hasWatch = this.dataProcessor.stars.stars !== 0;
+        let WatchMessage1 = "你共 watch 了" + this.dataProcessor.watches.watches.toString() + "个仓库";
+        let WatchMessage2 = "这些是那些仓库使用的主要语言";
+
+        let sortedLanguages = Array.from(this.dataProcessor.watches.languages)
+            .sort((language1, language2) => {
+                return language1[1] - language2[1];
+            });
+
+        let data: PieDatum[] = sortedLanguages.map((language) => {
+            return {
+                id: language[0],
+                value: language[1],
+            }
+        });
+
+        const pieChart = (data: PieDatum[]) => {
+            return (
+                <ResponsivePie data={data}
+                               enableSlicesLabels={false}
+                               isInteractive={false}
+                               margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+                               key='watchPieChart'/>
+            );
+        };
+
+        if (hasWatch) {
+            return (
+                <Row key='watchFrame'>
+                    <Col span={24}>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: frameHeight
+                        }}>
+                            {[
+                                pieChart(data),
+                                <Title key='watchMessage'>{WatchMessage1}<br/>{WatchMessage2}</Title>
+                            ]}
+                        </div>
+                    </Col>
+                </Row>
+            );
+        } else {
+            return (
+                <div key='watchFrame' />
             );
         }
     }
@@ -420,7 +528,7 @@ class DataPage extends Component<DataPageProps, DataPageState> {
                 <div id='dataFrames'>
                 {this.dataProcessor.contributions.hasAnyContributions &&
                 [
-                    <Row>
+                    <Row key='idFrame'>
                         <Col span={24}>
                             <div style={{ display: "flex",
                                 justifyContent: 'center',
@@ -436,6 +544,8 @@ class DataPage extends Component<DataPageProps, DataPageState> {
                     this.diligenceFrame(),
                     this.commitFrame(),
                     this.repositoryFrame(),
+                    this.starFrame(),
+                    this.watchFrame(),
                     this.issueFrame(),
                     this.pullRequestFrame()
                 ]}

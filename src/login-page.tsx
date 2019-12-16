@@ -1,5 +1,5 @@
 import React, {ChangeEvent, Component} from 'react'
-import {Button, Col, Input, message, Row} from "antd";
+import {Button, Col, Icon, Input, message, Row, Popover} from "antd";
 import 'antd/dist/antd.css';
 
 interface LoginPageProps {
@@ -50,6 +50,10 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
     }
 
     render() {
+        let tokenTip = <div style={{width: "250px"}}>
+                        <p>Personal access tokens. 可在<a href="https://github.com/settings/tokens" target='_blank' rel="noopener noreferrer">https://github.com/settings/tokens</a>上生成新的token, 为了安全起见，这里只需要您在生成时勾选read:user
+                        </p>
+                       </div>;
         return (
             <div style={{position: "absolute",
                          top: "50%",
@@ -68,7 +72,13 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
                     <Col span={24}>
                         <div style={{height: "100px"}}>
                             <Input.Password onChange={this.onTokenInputChange.bind(this)}
-                                   placeholder='请输入 token'/>
+                                            placeholder='请输入 token'
+                                            addonAfter={
+                                                <Popover content={tokenTip} trigger='click' placement='right'>
+                                                    <Icon type="question-circle" theme="twoTone" />
+                                                </Popover>
+                                            }/>
+
                         </div>
                     </Col>
                 </Row>

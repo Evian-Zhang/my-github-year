@@ -45,10 +45,33 @@ interface QueryResponse {
                                     name: string
                                 }]
                             }
+                            stargazers: {
+                                totalCount: number
+                            }
                         }
                     }]
                 },
                 totalRepositoryContributions: number
+            },
+            starredRepositories: {
+                nodes: [{
+                    languages: {
+                        nodes: [{
+                            name: string
+                        }]
+                    }
+                }],
+                totalCount: number
+            },
+            watching: {
+                nodes: [{
+                    languages: {
+                        nodes: [{
+                            name: string
+                        }]
+                    }
+                }],
+                totalCount: number
             }
         }
     }
@@ -110,10 +133,32 @@ class PullRequestData {
 class RepositoryData {
     totalRepositoryContributions: number;
     languages: Map<string, number>;
+    stars: number;
 
     constructor() {
         this.totalRepositoryContributions = 0;
         this.languages = new Map();
+        this.stars = 0;
+    }
+}
+
+class StarData {
+    stars: number;
+    languages: Map<string, number>;
+
+    constructor() {
+        this.languages = new Map();
+        this.stars = 0;
+    }
+}
+
+class WatchData {
+    watches: number;
+    languages: Map<string, number>;
+
+    constructor() {
+        this.languages = new Map();
+        this.watches = 0;
     }
 }
 
@@ -127,6 +172,8 @@ class DataProcessor {
     issues: IssueData;
     pullRequests: PullRequestData;
     repositories: RepositoryData;
+    stars: StarData;
+    watches: WatchData;
 
     constructor(username: string, token: string) {
         this.username = username;
@@ -137,6 +184,8 @@ class DataProcessor {
         this.issues = new IssueData();
         this.pullRequests = new PullRequestData();
         this.repositories = new RepositoryData();
+        this.stars = new StarData();
+        this.watches = new WatchData();
     }
 
     async fetchEvents() {
@@ -190,10 +239,33 @@ class DataProcessor {
                                             name
                                         }
                                     }
+                                    stargazers(first: 1) {
+                                        totalCount
+                                    }
                                 }
                             }
                         }
                         totalRepositoryContributions
+                    }
+                    starredRepositories(first: 64) {
+                        nodes {
+                            languages(first: 5, orderBy: { direction: DESC, field: SIZE }) {
+                                nodes {
+                                    name
+                                }
+                            }
+                        }
+                        totalCount
+                    }
+                    watching(first: 64) {
+                        nodes {
+                            languages(first: 5, orderBy: { direction: DESC, field: SIZE }) {
+                                nodes {
+                                    name
+                                }
+                            }
+                        }
+                        totalCount
                     }
                 }
             }`
@@ -233,11 +305,9 @@ class DataProcessor {
     processData() {
         if (this.rawData) {
             let rawData = this.rawData.data.user.contributionsCollection;
-            console.log(rawData);
             // ContributionData
             this.contributions.hasAnyContributions = rawData.hasAnyContributions;
             if (!this.contributions.hasAnyContributions) {
-                console.log(rawData.hasAnyContributions);
                 return;
             }
             this.contributions.totalContributions = rawData.contributionCalendar.totalContributions;
@@ -290,11 +360,42 @@ class DataProcessor {
                 let languages = repository.repository.languages.nodes;
                 for (let rank = 0; rank < languages.length; rank++) {
                     let score = 1 - rank * 0.1;
-                    let preScore = this.commits.languages.get(languages[rank].name);
+                    let preScore = this.repositories.languages.get(languages[rank].name);
                     if (preScore) {
                         this.repositories.languages.set(languages[rank].name, score + preScore);
                     } else {
                         this.repositories.languages.set(languages[rank].name, score);
+                    }
+                }
+                this.repositories.stars += repository.repository.stargazers.totalCount;
+            }
+
+            // StarData
+            this.stars.stars = this.rawData.data.user.starredRepositories.totalCount;
+            for (let repository of this.rawData.data.user.starredRepositories.nodes) {
+                let languages = repository.languages.nodes;
+                for (let rank = 0; rank < languages.length; rank++) {
+                    let score = 1 - rank * 0.1;
+                    let preScore = this.stars.languages.get(languages[rank].name);
+                    if (preScore) {
+                        this.stars.languages.set(languages[rank].name, score + preScore);
+                    } else {
+                        this.stars.languages.set(languages[rank].name, score);
+                    }
+                }
+            }
+
+            // WatchData
+            this.watches.watches = this.rawData.data.user.watching.totalCount;
+            for (let repository of this.rawData.data.user.watching.nodes) {
+                let languages = repository.languages.nodes;
+                for (let rank = 0; rank < languages.length; rank++) {
+                    let score = 1 - rank * 0.1;
+                    let preScore = this.watches.languages.get(languages[rank].name);
+                    if (preScore) {
+                        this.watches.languages.set(languages[rank].name, score + preScore);
+                    } else {
+                        this.watches.languages.set(languages[rank].name, score);
                     }
                 }
             }

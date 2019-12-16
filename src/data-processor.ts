@@ -57,11 +57,13 @@ interface QueryResponse {
 class ContributionData {
     hasAnyContributions: boolean;
     totalContributions: number;
+    contributionDays: number;
     contributionMonths: Array<number>;
 
     constructor() {
         this.hasAnyContributions = false;
         this.totalContributions = 0;
+        this.contributionDays = 0;
         this.contributionMonths = new Array(12);
         for (let month = 0; month < 12; month++) {
             this.contributionMonths[month] = 0;
@@ -242,6 +244,9 @@ class DataProcessor {
             for (let week of rawData.contributionCalendar.weeks) {
                 for (let day of week.contributionDays) {
                     this.contributions.contributionMonths[day.date.getMonth()] += day.contributionCount;
+                    if (day.contributionCount > 0) {
+                        this.contributions.contributionDays += 1;
+                    }
                 }
             }
 

@@ -51,7 +51,7 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
 
     render() {
         let tokenTip = <div style={{width: "250px"}}>
-                        <p>Personal access tokens. 可在<a href="https://github.com/settings/tokens" target='_blank' rel="noopener noreferrer">https://github.com/settings/tokens</a>上生成新的token, 为了安全起见，这里只需要您在生成时勾选read:user
+                        <p>Personal access tokens. 可在<a href="https://github.com/settings/tokens" target='_blank' rel="noopener noreferrer">https://github.com/settings/tokens</a>上生成新的token, 为了安全起见，这里只需要您在生成时勾选repo全项和read:user
                         </p>
                        </div>;
         return (

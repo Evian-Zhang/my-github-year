@@ -534,9 +534,14 @@ class DataPage extends Component<DataPageProps, DataPageState> {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 height: frameHeight }}>
+                                <Typography>
                                 <Title>
                                     {this.dataProcessor.username}的2019年
                                 </Title>
+                                    <Paragraph>
+                                        <img src={require("./QRcode.png")} alt="QR code" style={{ width: "300px" }}/>
+                                    </Paragraph>
+                                </Typography>
                             </div>
                         </Col>
                     </Row>,

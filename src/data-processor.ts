@@ -192,10 +192,11 @@ class DataProcessor {
         const headers = {
             'Authorization': `bearer ${this.token}`
         };
+	const currentYear = new Date().getFullYear();
         const body = {
             "query": `query {
                 user(login: "${this.username}") {
-                    contributionsCollection(from:"2019-01-01T00:00:00Z", to:"2019-12-31T23:59:59Z") {
+                    contributionsCollection(from:"${currentYear}-01-01T00:00:00Z", to:"${currentYear}-12-31T23:59:59Z") {
                         hasAnyContributions
                         contributionCalendar {
                             totalContributions

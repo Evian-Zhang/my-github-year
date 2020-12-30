@@ -73,6 +73,7 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
                         <div style={{height: "100px"}}>
                             <Input.Password onChange={this.onTokenInputChange.bind(this)}
                                             placeholder='请输入 token'
+                                            onPressEnter={this.onSubmit.bind(this)}
                                             addonAfter={
                                                 <Popover content={tokenTip} trigger='click' placement='right'>
                                                     <Icon type="question-circle" theme="twoTone" />

@@ -1,14 +1,14 @@
-import React, {ChangeEvent, Component} from 'react'
-import {Button, Col, Icon, Input, message, Row, Popover} from "antd";
-import 'antd/dist/antd.css';
+import React, { ChangeEvent, Component } from "react";
+import { Button, Col, Icon, Input, message, Row, Popover } from "antd";
+import "antd/dist/antd.css";
 
 interface LoginPageProps {
-    inputHandler: (arg1: string, arg2: string) => void
+    inputHandler: (arg1: string, arg2: string) => void;
 }
 
 interface LoginPageState {
-    isQuerying: boolean,
-    buttonContent: string
+    isQuerying: boolean;
+    buttonContent: string;
 }
 
 class LoginPage extends Component<LoginPageProps, LoginPageState> {
@@ -22,8 +22,9 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
         this.token = "";
         this.state = {
             isQuerying: false,
-            buttonContent: "查询"
+            buttonContent: "查询",
         };
+        localStorage.setItem("currentYear", new Date().getFullYear() + "");
     }
 
     onUsernameInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -39,10 +40,10 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
             if (this.token.length > 0) {
                 this.props.inputHandler(this.username, this.token);
                 this.setState({
-                    isQuerying: true
+                    isQuerying: true,
                 });
             } else {
-                message.error("token不得为空")
+                message.error("token不得为空");
             }
         } else {
             message.error("登录名不得为空");
@@ -50,44 +51,58 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
     }
 
     render() {
-        let tokenTip = <div style={{width: "250px"}}>
-                        <p>Personal access tokens. 可在<a href="https://github.com/settings/tokens" target='_blank' rel="noopener noreferrer">https://github.com/settings/tokens</a>上生成新的token, 为了安全起见，这里只需要您在生成时勾选repo全项和read:user
-                        </p>
-                       </div>;
+        let tokenTip = (
+            <div style={{ width: "250px" }}>
+                <p>
+                    Personal access tokens. 可在
+                    <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">
+                        https://github.com/settings/tokens
+                    </a>
+                    上生成新的token, 为了安全起见，这里只需要您在生成时勾选repo全项和read:user
+                </p>
+            </div>
+        );
         return (
-            <div style={{position: "absolute",
-                         top: "50%",
-                         left: "50%",
-                         transform: "translate(-50%, -50%)",
-                         msTransform: "translate(-50%, -50%)"}}>
+            <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", msTransform: "translate(-50%, -50%)" }}>
                 <Row>
                     <Col span={24}>
-                        <div style={{height: "100px"}}>
-                            <Input onChange={this.onUsernameInputChange.bind(this)}
-                                   placeholder='请输入 GitHub 登录名'/>
+                        <div style={{ height: "100px" }}>
+                            <Input onChange={this.onUsernameInputChange.bind(this)} placeholder="请输入 GitHub 登录名" />
                         </div>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <div style={{height: "100px"}}>
-                            <Input.Password onChange={this.onTokenInputChange.bind(this)}
-                                            placeholder='请输入 token'
-                                            addonAfter={
-                                                <Popover content={tokenTip} trigger='click' placement='right'>
-                                                    <Icon type="question-circle" theme="twoTone" />
-                                                </Popover>
-                                            }/>
-
+                        <div style={{ height: "100px" }}>
+                            <Input.Password
+                                onChange={this.onTokenInputChange.bind(this)}
+                                placeholder="请输入 token"
+                                onPressEnter={this.onSubmit.bind(this)}
+                                addonAfter={
+                                    <Popover content={tokenTip} trigger="click" placement="right">
+                                        <Icon type="question-circle" theme="twoTone" />
+                                    </Popover>
+                                }
+                            />
                         </div>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={24}>
-                        <Button type='primary'
-                                size='large'
-                                onClick={this.onSubmit.bind(this)}
-                                disabled={this.state.isQuerying}>
+                        <div style={{ height: "100px" }}>
+                            <Input
+                                onChange={(e) => {
+                                    localStorage.setItem("currentYear", e.target.value);
+                                }}
+                                placeholder="输入查询的年份"
+                                onPressEnter={this.onSubmit.bind(this)}
+                            />
+                        </div>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col span={24}>
+                        <Button type="primary" size="large" onClick={this.onSubmit.bind(this)} disabled={this.state.isQuerying}>
                             {this.state.buttonContent}
                         </Button>
                     </Col>

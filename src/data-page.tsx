@@ -91,7 +91,7 @@ class DataPage extends Component<DataPageProps, DataPageState> {
                          alignItems: 'center',
                          height: frameHeight }}>
                         <Title>
-                            在2019年的365天里，你一共有{this.dataProcessor.contributions.contributionDays}天在使用 GitHub
+                            在{localStorage.getItem("currentYear")}年的365天里，你一共有{this.dataProcessor.contributions.contributionDays}天在使用 GitHub
                         </Title>
                         {pieChart(data)}
                     </div>
@@ -510,7 +510,7 @@ class DataPage extends Component<DataPageProps, DataPageState> {
                               alignItems: 'center',
                               height: frameHeight }}>
                     <Title style={{ textAlign: 'center' }}>
-                        你在2019年似乎并没有使用 GitHub
+                        你在{localStorage.getItem("currentYear")}年似乎并没有使用 GitHub
                     </Title>
                 </div>
             );
@@ -536,7 +536,7 @@ class DataPage extends Component<DataPageProps, DataPageState> {
                                 height: frameHeight }}>
                                 <Typography>
                                 <Title>
-                                    {this.dataProcessor.username}的2019年
+                                    {this.dataProcessor.username}的{localStorage.getItem("currentYear")}年
                                 </Title>
                                     <Paragraph>
                                         <img src={require("./QRcode.png")} alt="QR code" style={{ width: "300px" }}/>

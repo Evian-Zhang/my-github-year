@@ -2,79 +2,99 @@ interface QueryResponse {
     data: {
         user: {
             contributionsCollection: {
-                hasAnyContributions: boolean,
+                hasAnyContributions: boolean;
                 contributionCalendar: {
-                    totalContributions: number,
-                    weeks: [{
-                        contributionDays: [{
-                            date: Date,
-                            contributionCount: number
-                        }]
-                    }]
-                },
-                totalCommitContributions: number,
-                totalRepositoriesWithContributedCommits: number,
-                commitContributionsByRepository: [{
-                    repository: {
-                        languages: {
-                            nodes: [{
-                                name: string
-                            }]
+                    totalContributions: number;
+                    weeks: [
+                        {
+                            contributionDays: [
+                                {
+                                    date: Date;
+                                    contributionCount: number;
+                                }
+                            ];
                         }
-                    }
-                }],
-                totalIssueContributions: number,
-                totalRepositoriesWithContributedIssues: number,
-                popularIssueContribution: {
-                    issue: {
-                        title: string
-                    }
-                } | null,
-                totalPullRequestContributions: number,
-                totalRepositoriesWithContributedPullRequests: number,
-                popularPullRequestContribution: {
-                    pullRequest: {
-                        title: string
-                    }
-                } | null,
-                repositoryContributions: {
-                    nodes: [{
+                    ];
+                };
+                totalCommitContributions: number;
+                totalRepositoriesWithContributedCommits: number;
+                commitContributionsByRepository: [
+                    {
                         repository: {
                             languages: {
-                                nodes: [{
-                                    name: string
-                                }]
-                            }
-                            stargazers: {
-                                totalCount: number
-                            }
+                                nodes: [
+                                    {
+                                        name: string;
+                                    }
+                                ];
+                            };
+                        };
+                    }
+                ];
+                totalIssueContributions: number;
+                totalRepositoriesWithContributedIssues: number;
+                popularIssueContribution: {
+                    issue: {
+                        title: string;
+                    };
+                } | null;
+                totalPullRequestContributions: number;
+                totalRepositoriesWithContributedPullRequests: number;
+                popularPullRequestContribution: {
+                    pullRequest: {
+                        title: string;
+                    };
+                } | null;
+                repositoryContributions: {
+                    nodes: [
+                        {
+                            repository: {
+                                languages: {
+                                    nodes: [
+                                        {
+                                            name: string;
+                                        }
+                                    ];
+                                };
+                                stargazers: {
+                                    totalCount: number;
+                                };
+                            };
                         }
-                    }]
-                },
-                totalRepositoryContributions: number
-            },
+                    ];
+                };
+                totalRepositoryContributions: number;
+            };
             starredRepositories: {
-                nodes: [{
-                    languages: {
-                        nodes: [{
-                            name: string
-                        }]
+                nodes: [
+                    {
+                        languages: {
+                            nodes: [
+                                {
+                                    name: string;
+                                }
+                            ];
+                        };
                     }
-                }],
-                totalCount: number
-            },
+                ];
+                totalCount: number;
+            };
             watching: {
-                nodes: [{
-                    languages: {
-                        nodes: [{
-                            name: string
-                        }]
+                nodes: [
+                    {
+                        languages: {
+                            nodes: [
+                                {
+                                    name: string;
+                                }
+                            ];
+                        };
                     }
-                }],
-                totalCount: number
-            }
-        }
-    }
+                ];
+                totalCount: number;
+            };
+        };
+    };
 }
 
 class ContributionData {
@@ -190,12 +210,13 @@ class DataProcessor {
 
     async fetchEvents() {
         const headers = {
-            'Authorization': `bearer ${this.token}`
+            Authorization: `bearer ${this.token}`,
         };
+        const currentYear = localStorage.getItem("currentYear");
         const body = {
-            "query": `query {
+            query: `query {
                 user(login: "${this.username}") {
-                    contributionsCollection(from:"2019-01-01T00:00:00Z", to:"2019-12-31T23:59:59Z") {
+                    contributionsCollection(from:"${currentYear}-01-01T00:00:00Z", to:"${currentYear}-12-31T23:59:59Z") {
                         hasAnyContributions
                         contributionCalendar {
                             totalContributions
@@ -268,12 +289,12 @@ class DataProcessor {
                         totalCount
                     }
                 }
-            }`
+            }`,
         };
         let res = await fetch("https://api.github.com/graphql", {
-            method: 'POST',
+            method: "POST",
             body: JSON.stringify(body),
-            headers: headers
+            headers: headers,
         });
         if (res.status !== 200) {
             let message = "未知错误";
@@ -403,4 +424,4 @@ class DataProcessor {
     }
 }
 
-export { DataProcessor }
+export { DataProcessor };

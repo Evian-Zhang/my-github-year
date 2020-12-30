@@ -24,6 +24,7 @@ class LoginPage extends Component<LoginPageProps, LoginPageState> {
             isQuerying: false,
             buttonContent: "查询",
         };
+        localStorage.setItem("currentYear", "2020");
     }
 
     onUsernameInputChange(event: ChangeEvent<HTMLInputElement>) {
